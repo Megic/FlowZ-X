@@ -1,6 +1,6 @@
 {
   "name": "flowz-x",
-  "version": "3.4.7",
+  "version": "4.0.1",
   "singboxVersion": "1.13.6",
   "description": "FlowZ-X - 简洁现代的跨平台代理客户端",
   "main": "dist/main/main/index.js",

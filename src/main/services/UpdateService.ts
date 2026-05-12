@@ -10,7 +10,7 @@ import { LogManager } from './LogManager';
 import type { UpdateInfo, UpdateCheckResult, UpdateProgress } from '../../shared/types/update';
 import { getUserDataPath } from '../utils/paths';
 
-const GITHUB_OWNER = 'dododook';
+const GITHUB_OWNER = 'Megic';
 const GITHUB_REPO = 'FlowZ-X';
 
 export class UpdateService {

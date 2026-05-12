@@ -263,7 +263,7 @@ export function AboutSettings() {
   };
 
   const handleOpenGitHub = async () => {
-    const url = versionInfo?.repositoryUrl || 'https://github.com/dododook/FlowZ-X';
+    const url = versionInfo?.repositoryUrl || 'https://github.com/Megic/FlowZ-X';
     await openExternal(url);
   };
 
