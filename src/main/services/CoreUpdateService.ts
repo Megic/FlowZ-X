@@ -520,7 +520,7 @@ export class CoreUpdateService {
         method: 'GET',
         url: 'https://api.github.com/repos/SagerNet/sing-box/releases',
       });
-      request.setHeader('User-Agent', 'FlowZ-Electron');
+      request.setHeader('User-Agent', 'FlowZ-X-Electron');
       request.setHeader('Accept', 'application/vnd.github.v3+json');
 
       request.on('response', (res) => {
@@ -663,7 +663,7 @@ export class CoreUpdateService {
       };
 
       const request = net.request(url);
-      request.setHeader('User-Agent', 'FlowZ-Electron');
+      request.setHeader('User-Agent', 'FlowZ-X-Electron');
 
       request.on('response', (response) => {
         if (response.statusCode >= 400) {
@@ -831,7 +831,7 @@ export class CoreUpdateService {
       );
 
       // Fall back: use PowerShell with -Verb RunAs to elevate.
-      const scriptPath = path.join(app.getPath('temp'), `flowz-copy-${Date.now()}.ps1`);
+      const scriptPath = path.join(app.getPath('temp'), `flowz-x-copy-${Date.now()}.ps1`);
       // 使用 $ErrorActionPreference = 'Stop' 确保出错时非 0 退出
       fs.writeFileSync(
         scriptPath,

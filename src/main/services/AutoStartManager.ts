@@ -28,7 +28,7 @@ class LinuxAutoStart implements IAutoStartManager {
   }
 
   private get desktopFilePath(): string {
-    return require('path').join(this.autostartDir, 'flowz.desktop');
+    return require('path').join(this.autostartDir, 'flowz-x.desktop');
   }
 
   async setAutoStart(enabled: boolean): Promise<boolean> {
@@ -43,8 +43,8 @@ class LinuxAutoStart implements IAutoStartManager {
         const desktopContent = `[Desktop Entry]
 Type=Application
 Version=1.0
-Name=FlowZ
-Comment=FlowZ Proxy Client
+Name=FlowZ-X
+Comment=FlowZ-X Proxy Client
 Exec="${app.getPath('exe')}" --hidden
 Icon=${require('./ResourceManager').resourceManager.getAppIconPath()}
 Terminal=false

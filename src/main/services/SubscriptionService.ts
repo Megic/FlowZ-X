@@ -197,7 +197,7 @@ export class SubscriptionService {
       this.logManager.addLog('info', `正在拉取订阅: ${url}`, 'Subscription');
 
       const response = await net.fetch(url, {
-        headers: { 'User-Agent': 'FlowZ-Client' },
+        headers: { 'User-Agent': 'FlowZ-X-Client' },
       });
 
       if (!response.ok) {

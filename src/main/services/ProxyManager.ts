@@ -48,6 +48,43 @@ const PRIVATE_IP_PATTERNS = [
   /\b169\.254\.\d{1,3}\.\d{1,3}/,
 ];
 
+const PACKAGED_APP_PROCESS_NAMES = [
+  'FlowZ-X',
+  'FlowZ-X.exe',
+  'FlowZ-X Helper',
+  'FlowZ-X Helper.exe',
+  'FlowZ-X Helper (Plugin)',
+  'FlowZ-X Helper (Plugin).exe',
+  // 保留旧名称，避免升级后短时间内还有旧进程名或旧安装目录残留。
+  'FlowZ',
+  'FlowZ.exe',
+  'FlowZ Helper',
+  'FlowZ Helper.exe',
+  'FlowZ Helper (Plugin)',
+  'FlowZ Helper (Plugin).exe',
+];
+
+const DEV_APP_PROCESS_NAMES = [
+  // 本地开发时 Electron 主进程和 Vite/Node 进程也必须直连，防止 TUN 回流影响调试。
+  'Electron',
+  'Electron.exe',
+  'electron',
+  'electron.exe',
+  'node',
+  'node.exe',
+  'npm',
+  'npm.exe',
+  'npx',
+  'npx.exe',
+];
+
+function getAppProcessNames(): string[] {
+  if (process.env.NODE_ENV === 'development') {
+    return [...PACKAGED_APP_PROCESS_NAMES, ...DEV_APP_PROCESS_NAMES];
+  }
+  return PACKAGED_APP_PROCESS_NAMES;
+}
+
 /**
  * 国内常见网银 U盾插件及本地证券/炒股软件的专属域名
  * 用于绕过代理，防止被 FakeIP 劫持或因协议不兼容（如二进制协议通过 HTTP 代理）被阻断
@@ -816,13 +853,13 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         server_port: 53,
       },
       {
-        // 引导解析（DoH）：作为 UDP 的备份
+        // 引导解析（DoH）：用于 TUN 下真实域名解析，避免 Windows UDP 53 直连失败
         tag: 'dns-bootstrap',
         type: 'https',
         server: '223.5.5.5',
         server_port: 443,
         path: '/dns-query',
-        domain_resolver: 'dns-bootstrap-udp',
+        detour: 'direct',
       },
       {
         // 兼容性和兜底的系统 DNS
@@ -836,7 +873,8 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         server: 'doh.pub',
         server_port: 443,
         path: '/dns-query',
-        domain_resolver: 'dns-bootstrap-udp',
+        domain_resolver: 'dns-bootstrap',
+        detour: 'direct',
       },
       {
         // 远程代理 DNS (推荐 DoH)
@@ -845,7 +883,7 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         server: 'dns.google',
         server_port: 443,
         path: '/dns-query',
-        domain_resolver: 'dns-bootstrap-udp',
+        domain_resolver: 'dns-bootstrap',
         // 关键核心：远程解析必须走代理，否则在境内直接发起会因 GFW 拦截/污染导致 FakeIP 映射失败或由于 TTL 极短产生大量无效解析。
         detour: selectedServerTag,
       },
@@ -884,14 +922,14 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         domain: uniqueDomains,
         domain_suffix: uniqueDomains.flatMap((d) => [d, `.${d}`]),
         domain_keyword: uniqueDomains,
-        server: 'dns-bootstrap-udp',
+        server: 'dns-bootstrap',
       } as SingBoxDnsRule);
     }
 
     // 处理基础 DNS 服务的地址解析，确保它们走引导解析器
     dnsRules.push({
       domain: ['doh.pub', 'dns.google', 'cloudflare-dns.com', 'one.one.one.one'],
-      server: 'dns-bootstrap-udp',
+      server: 'dns-bootstrap',
     } as SingBoxDnsRule);
 
     // 解决 mDNS 和本地反向解析导致的 context deadline exceeded 超时问题
@@ -986,7 +1024,7 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
     // 关键修复：必须启用流量嗅探（sniff），否则 sing-box 无法从 TLS ClientHello 中
     // 提取域名（SNI），导致路由引擎只看到 IP 地址，无法匹配 geosite 规则正确分流。
     // 症状：Instagram 消息中心无网络、WhatsApp 二维码无法扫码等 WebSocket 类应用异常。
-    // NekoBox 等 sing-box 客户端默认开启 sniff，FlowZ 之前遗漏了。
+    // NekoBox 等 sing-box 客户端默认开启 sniff，FlowZ-X 之前遗漏了。
     //
     // 版本兼容：
     //   1.12.x → sniff/sniff_override_destination 是 inbound 级别字段
@@ -1060,7 +1098,7 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
       }
 
       // 绝杀级修复（多服务器版本）：如果在 应用分流 (App Policy) 中选择了其他节点，那么这些节点的 IP 也必须被排除。
-      // 否则，FlowZ 去连接这些次选节点的流量也会回流进入 TUN 产生死循环。
+      // 否则，FlowZ-X 去连接这些次选节点的流量也会回流进入 TUN 产生死循环。
       const allServerIds = new Set([
         config.selectedServerId as string,
         ...(config.appRules || []).map((r) => r.targetServerId),
@@ -1259,6 +1297,9 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
     outbounds.push({
       type: 'direct',
       tag: 'direct',
+      // sing-box 1.13+ 不允许 DNS detour 到完全空的 direct outbound。
+      // 显式设置该字段使 direct outbound 非空，同时保持直连语义。
+      udp_fragment: false,
     });
 
     // 版本条件：sing-box 1.12.x 需要在 outbound 层面做 override_address
@@ -1341,8 +1382,8 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
       tag: idToTagMap.get(server.id) || `proxy-${server.id}`,
       server: server.address,
       server_port: server.port,
-      // 代理服务器使用 IP-based 引导解析器，防止因 dns-local 死循环导致的连接挂起
-      domain_resolver: 'dns-bootstrap-udp',
+      // 代理服务器使用 DoH 引导解析器，避免 TUN 下 UDP 53 直连失败或回流
+      domain_resolver: 'dns-bootstrap',
     };
 
     // VLESS 特定配置
@@ -1602,6 +1643,7 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
 
     const versionArr = this.coreVersion.split('.');
     const versionNum = parseFloat(versionArr[0] + '.' + (versionArr[1] || '0'));
+    const appProcessNames = getAppProcessNames();
 
     // A. 嗅探规则（必须在前，用于识别域名）
     // 1.13+ 必须在路由层开启 sniff，替代已移除的 inbound 级别 sniff 字段
@@ -1612,19 +1654,10 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
       } as any);
     }
 
-    // 1. 强制放行 FlowZ 及其核心进程：防止 DNS 回流死循环
+    // 1. 强制放行 FlowZ-X 及其核心进程：防止 DNS 回流死循环
     // 必须放在最高优先级，确保核心组件的 DNS 请求能直连物理网卡
     rules.push({
-      process_name: [
-        'sing-box',
-        'sing-box.exe',
-        'FlowZ',
-        'FlowZ.exe',
-        'FlowZ Helper',
-        'FlowZ Helper.exe',
-        'FlowZ Helper (Plugin)',
-        'FlowZ Helper (Plugin).exe',
-      ],
+      process_name: ['sing-box', 'sing-box.exe', ...appProcessNames],
       action: 'route',
       outbound: 'direct',
     });
@@ -1671,12 +1704,7 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         'ClashX Pro',
         'clash-meta',
         'Quantumult X',
-        'FlowZ',
-        'FlowZ.exe',
-        'FlowZ Helper',
-        'FlowZ Helper.exe',
-        'FlowZ Helper (Plugin)',
-        'FlowZ Helper (Plugin).exe',
+        ...appProcessNames,
         'sing-box',
         'sing-box.exe',
         'mDNSResponder',
@@ -1698,9 +1726,8 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
     // 智能分流规则
     const routeConfig: SingBoxRouteConfig = {
       rules,
-      // 核心修复：macOS 下 default_domain_resolver 必须使用 IP-based 引导解析器 (dns-bootstrap-udp)
-      // 避免解析 doh.pub 域名时产生的死循环。
-      default_domain_resolver: 'dns-bootstrap-udp',
+      // TUN 下默认域名解析必须避开 UDP 53，使用 DoH bootstrap 防止 Windows 直连失败或回流。
+      default_domain_resolver: 'dns-bootstrap',
       auto_detect_interface: true,
       // 如果模式是全局代理 (global/proxy)，则最终出口是所选节点
       final: proxyMode === 'direct' ? 'direct' : selectedServerTag,
@@ -1916,15 +1943,6 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
       }
     }
 
-    // 【QUIC 阻断】：放在自定义规则和应用分流之后，确保用户的 direct/proxy 规则优先级更高
-    // 这样游戏设为直连时，进程名匹配在前，游戏的 UDP 流量不会被误拒。
-    // 仅阻断未被上方规则匹配到的剩余浏览器 QUIC（UDP 443），迫使其回退到 TCP (TLS)。
-    rules.push({
-      network: ['udp'],
-      port: [443],
-      action: 'reject',
-    } as any);
-
     // 智能分流规则（仅在智能分流模式下启用）
     if (proxyMode === 'smart') {
       // 已移除 ::/0 block，因为 block 是静默丢包，会导致 Chrome 等浏览器在发起 TCP SYN 包时陷入漫长的 21 秒重传等待（Happy Eyeballs 假死），
@@ -1957,6 +1975,15 @@ export class ProxyManager extends EventEmitter implements IProxyManager {
         outbound: 'direct',
       });
     }
+
+    // 【QUIC 阻断】：放在自定义规则、应用分流和智能分流默认规则之后。
+    // 国内站点（如 docs.qq.com）应先命中 geosite-cn/geoip-cn 直连，剩余未匹配的浏览器 QUIC
+    // 再被拒绝并回退到 TCP (TLS)，避免 UDP 443 抢先拦截国内直连流量。
+    rules.push({
+      network: ['udp'],
+      port: [443],
+      action: 'reject',
+    } as any);
 
     // 添加 rule_set（除非是直连模式）
     // 直连模式下不需要 rule_set，因为全部走 direct

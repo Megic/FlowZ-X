@@ -1,4 +1,4 @@
-# FlowZ
+# FlowZ-X
 
 原作者大佬开源地址：https://github.com/zhangjh/FlowZ
 
@@ -73,7 +73,7 @@
 若 macOS 提示“软件已损坏”：
 
 ```bash
-xattr -cr /Applications/FlowZ.app
+xattr -cr /Applications/FlowZ-X.app
 ```
 
 ---
@@ -81,8 +81,8 @@ xattr -cr /Applications/FlowZ.app
 ## 🛠 从源码构建
 
 ```bash
-git clone https://github.com/zhangjh/FlowZ.git
-cd FlowZ
+git clone https://github.com/dododook/FlowZ-X.git
+cd FlowZ-X
 
 npm install
 npm run dev
@@ -153,4 +153,4 @@ MIT License
 
 ## ⭐ Star 趋势
 
-[![Star History Chart](https://api.star-history.com/svg?repos=dododook/FlowZ&type=Date)](https://star-history.com/#dododook/FlowZ&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=dododook/FlowZ-X&type=Date)](https://star-history.com/#dododook/FlowZ-X&Date)

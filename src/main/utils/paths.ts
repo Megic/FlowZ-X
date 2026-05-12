@@ -16,8 +16,8 @@ let cachedUserDataPath: string | null = null;
  * 解决以 root 权限运行时 app.getPath('userData') 返回 /var/root/... 的问题
  *
  * 在 macOS 上，当应用以 root 权限运行时：
- * - app.getPath('userData') 返回 /var/root/Library/Application Support/FlowZ
- * - 但我们需要的是 /Users/<actual_user>/Library/Application Support/FlowZ
+ * - app.getPath('userData') 返回 /var/root/Library/Application Support/FlowZ-X
+ * - 但我们需要的是 /Users/<actual_user>/Library/Application Support/FlowZ-X
  *
  * 策略：
  * 1. 如果已缓存路径，直接返回
@@ -41,11 +41,11 @@ export function getUserDataPath(): string {
     if (sudoUser) {
       // 通过 SUDO_USER 构建正确的路径
       const realUserHome = `/Users/${sudoUser}`;
-      const appName = app.getName() || 'FlowZ';
+      const appName = app.getName() || 'FlowZ-X';
       userDataPath = path.join(realUserHome, 'Library/Application Support', appName);
     } else if (homeDir && homeDir.startsWith('/Users/')) {
       // 通过 HOME 环境变量获取
-      const appName = app.getName() || 'FlowZ';
+      const appName = app.getName() || 'FlowZ-X';
       // 提取用户名
       const match = homeDir.match(/^\/Users\/([^/]+)/);
       if (match) {

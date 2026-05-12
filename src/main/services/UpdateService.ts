@@ -11,7 +11,7 @@ import type { UpdateInfo, UpdateCheckResult, UpdateProgress } from '../../shared
 import { getUserDataPath } from '../utils/paths';
 
 const GITHUB_OWNER = 'dododook';
-const GITHUB_REPO = 'FlowZ';
+const GITHUB_REPO = 'FlowZ-X';
 
 export class UpdateService {
   private logManager: LogManager;
@@ -193,7 +193,7 @@ export class UpdateService {
       if (process.platform === 'win32') {
         // Windows: 使用 VBScript 完全隐藏窗口运行安装程序
         const { spawn } = require('child_process');
-        const vbsPath = path.join(app.getPath('temp'), 'flowz_update.vbs');
+        const vbsPath = path.join(app.getPath('temp'), 'flowz-x_update.vbs');
 
         // VBScript: 等待 2 秒确保应用完全退出，然后静默启动安装程序
         // WScript.Shell.Run 的第二个参数 0 表示隐藏窗口，第三个参数 false 表示不等待
@@ -227,7 +227,7 @@ export class UpdateService {
         const { spawn } = require('child_process');
 
         // 创建一个 shell 脚本来处理更新
-        const scriptPath = path.join(app.getPath('temp'), 'flowz_update.sh');
+        const scriptPath = path.join(app.getPath('temp'), 'flowz-x_update.sh');
 
         // 脚本内容：等待应用退出，挂载 DMG，复制新版本，卸载 DMG，启动新版本
         const scriptContent = `#!/bin/bash
@@ -544,7 +544,7 @@ open "${installerPath}"
         method: 'GET',
         url: `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases`,
       });
-      request.setHeader('User-Agent', 'FlowZ-Electron');
+      request.setHeader('User-Agent', 'FlowZ-X-Electron');
       request.setHeader('Accept', 'application/vnd.github.v3+json');
 
       request.on('response', (res) => {
@@ -646,7 +646,7 @@ open "${installerPath}"
         url: url,
         method: 'GET',
       });
-      request.setHeader('User-Agent', 'FlowZ-Electron');
+      request.setHeader('User-Agent', 'FlowZ-X-Electron');
 
       request.on('response', (response) => {
         if (response.statusCode === 302 || response.statusCode === 301) {
@@ -734,7 +734,7 @@ open "${installerPath}"
         url: url,
         method: 'GET',
       });
-      request.setHeader('User-Agent', 'FlowZ-Electron');
+      request.setHeader('User-Agent', 'FlowZ-X-Electron');
 
       request.on('response', (response) => {
         if (response.statusCode === 302 || response.statusCode === 301) {

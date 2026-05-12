@@ -149,7 +149,7 @@ export class TrayManager implements ITrayManager {
       const icon = this.loadTrayIcon('idle');
 
       this.tray = new Tray(icon);
-      this.tray.setToolTip('FlowZ');
+      this.tray.setToolTip('FlowZ-X');
 
       // 设置托盘图标点击事件
       this.tray.on('click', () => {
@@ -584,7 +584,7 @@ export class TrayManager implements ITrayManager {
       this.onCheckUpdate();
     } else {
       // 默认行为：打开 GitHub releases 页面
-      shell.openExternal('https://github.com/dododook/FlowZ/releases');
+      shell.openExternal('https://github.com/dododook/FlowZ-X/releases');
     }
   }
 
@@ -659,9 +659,9 @@ export class TrayManager implements ITrayManager {
     if (!this.tray) return;
 
     const tooltips: Record<TrayIconState, string> = {
-      idle: this.t('FlowZ - 未连接', 'FlowZ - Disconnected'),
-      connecting: this.t('FlowZ - 连接中...', 'FlowZ - Connecting...'),
-      connected: this.t('FlowZ - 已连接', 'FlowZ - Connected'),
+      idle: this.t('FlowZ-X - 未连接', 'FlowZ-X - Disconnected'),
+      connecting: this.t('FlowZ-X - 连接中...', 'FlowZ-X - Connecting...'),
+      connected: this.t('FlowZ-X - 已连接', 'FlowZ-X - Connected'),
     };
 
     const tooltip = tooltips[this.currentState];

@@ -1,6 +1,6 @@
 {
-  "appId": "com.flowz.app",
-  "productName": "FlowZ",
+  "appId": "com.flowz-x.app",
+  "productName": "FlowZ-X",
   "copyright": "Copyright © 2025",
   "directories": {
     "output": "dist-package",
@@ -54,7 +54,7 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "FlowZ",
+    "shortcutName": "FlowZ-X",
     "installerIcon": "build/icon.ico",
     "uninstallerIcon": "build/icon.ico",
     "installerHeaderIcon": "build/icon.ico",

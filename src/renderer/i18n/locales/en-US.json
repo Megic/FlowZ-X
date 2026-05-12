@@ -69,7 +69,7 @@
     "systemProxyMode": "System Proxy Mode",
     "manualModeTip": "Local proxy is ready! Please configure your apps to use SOCKS5/HTTP port 127.0.0.1.",
     "tunNeedsAdmin": "TUN mode requires admin privileges, please run the app as administrator",
-    "tunDriverFail": "TUN driver failed to load, please check if wintun.dll exists",
+    "tunDriverFail": "TUN driver failed to load, please check whether the system TUN driver works properly",
     "tunInterfaceFail": "TUN interface creation failed, please check network settings",
     "singboxMissing": "sing-box core file is missing or cannot start",
     "uptime": "Uptime: {{min}} min",
@@ -266,7 +266,7 @@
         "importSuccess": "Configuration restored",
         "importSuccessDesc": "Restored {{servers}} nodes, {{subs}} subscriptions, {{rules}} rules",
         "importFail": "Import failed",
-        "importInvalidFile": "Invalid file. Please select a valid FlowZ backup file.",
+        "importInvalidFile": "Invalid file. Please select a valid FlowZ-X backup file.",
         "importConfirmTitle": "Confirm Restore",
         "importConfirmDesc": "This will completely overwrite your current nodes, subscriptions, and rules. This action cannot be undone. Please confirm before proceeding.",
         "importConfirmBtn": "Confirm & Restore"
@@ -628,7 +628,7 @@
     "totalTraffic": "Total:",
     "expireTime": "Expires:",
     "autoUpdate": "Auto Update",
-    "autoUpdateDesc": "When enabled, FlowZ will attempt to update subscription nodes on startup",
+    "autoUpdateDesc": "When enabled, FlowZ-X will attempt to update subscription nodes on startup",
     "cancel": "Cancel",
     "saveChange": "Save Changes",
     "addAndUpdate": "Add & Update"

@@ -68,7 +68,7 @@
     "systemProxyMode": "系统代理模式",
     "manualModeTip": "本地代理已就绪，请在其他软件中配置 SOCKS5/HTTP 端口使用。",
     "tunNeedsAdmin": "TUN模式需要管理员权限，请以管理员身份运行应用",
-    "tunDriverFail": "TUN驱动加载失败，请检查wintun.dll是否存在",
+    "tunDriverFail": "TUN驱动加载失败，请检查系统TUN驱动是否正常",
     "tunInterfaceFail": "TUN接口创建失败，请检查系统网络设置",
     "singboxMissing": "sing-box核心文件缺失或无法启动",
     "uptime": "运行时间: {{min}} 分钟",
@@ -265,7 +265,7 @@
         "importSuccess": "配置已恢复",
         "importSuccessDesc": "已恢复 {{servers}} 个节点、{{subs}} 个订阅、{{rules}} 条规则",
         "importFail": "导入失败",
-        "importInvalidFile": "文件格式无效，请选择正确的 FlowZ 备份文件",
+        "importInvalidFile": "文件格式无效，请选择正确的 FlowZ-X 备份文件",
         "importConfirmTitle": "确认恢复配置",
         "importConfirmDesc": "此操作将完全覆盖当前的节点、订阅和规则配置，且无法撤销。请确认您已了解风险后再继续。",
         "importConfirmBtn": "确认覆盖恢复"
@@ -628,7 +628,7 @@
     "totalTraffic": "总流量:",
     "expireTime": "到期时间:",
     "autoUpdate": "自动更新",
-    "autoUpdateDesc": "开启后，FlowZ 启动时会自动尝试更新订阅节点",
+    "autoUpdateDesc": "开启后，FlowZ-X 启动时会自动尝试更新订阅节点",
     "cancel": "取消",
     "saveChange": "保存修改",
     "addAndUpdate": "添加并更新"

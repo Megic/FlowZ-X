@@ -8,6 +8,8 @@ import { promisify } from 'util';
 import { retry } from '../utils/retry';
 
 const execAsync = promisify(exec);
+const QUIC_FIREWALL_RULE = 'FlowZ-X_Block_QUIC';
+const LEGACY_QUIC_FIREWALL_RULE = 'FlowZ_Block_QUIC';
 
 /**
  * 系统代理状态
@@ -137,11 +139,14 @@ export class WindowsSystemProxy extends SystemProxyBase {
           // 核心特性：阻断 QUIC (UDP 443)，迫使浏览器回退到 TCP 以完美兼容系统代理
           // 很多应用（如 Instagram 的站内信）使用 QUIC，会无视系统 HTTP 代理直连导致被墙。
           // 利用 Windows 防火墙精准屏蔽出站 UDP 443，可实现类似 TUN 模式的稳定体验。
-          await execAsync('netsh advfirewall firewall delete rule name="FlowZ_Block_QUIC"').catch(
-            () => {}
-          );
           await execAsync(
-            'netsh advfirewall firewall add rule name="FlowZ_Block_QUIC" dir=out action=block protocol=UDP remoteport=443'
+            `netsh advfirewall firewall delete rule name="${QUIC_FIREWALL_RULE}"`
+          ).catch(() => {});
+          await execAsync(
+            `netsh advfirewall firewall delete rule name="${LEGACY_QUIC_FIREWALL_RULE}"`
+          ).catch(() => {});
+          await execAsync(
+            `netsh advfirewall firewall add rule name="${QUIC_FIREWALL_RULE}" dir=out action=block protocol=UDP remoteport=443`
           ).catch((e) => console.log('添加 QUIC 阻断防火墙规则失败:', e));
 
           // 通知系统代理设置已更改
@@ -173,9 +178,12 @@ export class WindowsSystemProxy extends SystemProxyBase {
         console.log('正在回滚到原始代理设置...');
         try {
           // 清除可能残留的防火墙规则
-          await execAsync('netsh advfirewall firewall delete rule name="FlowZ_Block_QUIC"').catch(
-            () => {}
-          );
+          await execAsync(
+            `netsh advfirewall firewall delete rule name="${QUIC_FIREWALL_RULE}"`
+          ).catch(() => {});
+          await execAsync(
+            `netsh advfirewall firewall delete rule name="${LEGACY_QUIC_FIREWALL_RULE}"`
+          ).catch(() => {});
           await this.restoreProxySettings(this.originalSettings);
           console.log('已成功回滚到原始代理设置');
         } catch (rollbackError) {
@@ -198,9 +206,12 @@ export class WindowsSystemProxy extends SystemProxyBase {
     console.log('正在禁用 Windows 系统代理...');
 
     // 禁用代理时务必清除 QUIC 阻断规则
-    await execAsync('netsh advfirewall firewall delete rule name="FlowZ_Block_QUIC"').catch(
+    await execAsync(`netsh advfirewall firewall delete rule name="${QUIC_FIREWALL_RULE}"`).catch(
       () => {}
     );
+    await execAsync(
+      `netsh advfirewall firewall delete rule name="${LEGACY_QUIC_FIREWALL_RULE}"`
+    ).catch(() => {});
 
     try {
       if (this.originalSettings) {
@@ -227,9 +238,16 @@ export class WindowsSystemProxy extends SystemProxyBase {
    */
   disableProxySync(): void {
     const { execSync } = require('child_process');
+    // 禁用代理时务必清除 QUIC 阻断规则
     try {
-      // 禁用代理时务必清除 QUIC 阻断规则
-      execSync('netsh advfirewall firewall delete rule name="FlowZ_Block_QUIC"', {
+      execSync(`netsh advfirewall firewall delete rule name="${QUIC_FIREWALL_RULE}"`, {
+        stdio: 'ignore',
+      });
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`netsh advfirewall firewall delete rule name="${LEGACY_QUIC_FIREWALL_RULE}"`, {
         stdio: 'ignore',
       });
     } catch {
@@ -314,9 +332,12 @@ export class WindowsSystemProxy extends SystemProxyBase {
     } else {
       // 禁用代理
       await execAsync(`reg add "${this.regPath}" /v ProxyEnable /t REG_DWORD /d 0 /f`);
-      await execAsync('netsh advfirewall firewall delete rule name="FlowZ_Block_QUIC"').catch(
+      await execAsync(`netsh advfirewall firewall delete rule name="${QUIC_FIREWALL_RULE}"`).catch(
         () => {}
       );
+      await execAsync(
+        `netsh advfirewall firewall delete rule name="${LEGACY_QUIC_FIREWALL_RULE}"`
+      ).catch(() => {});
     }
 
     await this.notifyProxyChange();

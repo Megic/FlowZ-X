@@ -56,6 +56,9 @@ let mainWindow: BrowserWindow | null = null;
 let trayManager: TrayManager | null = null;
 const isDevelopment = process.env.NODE_ENV === 'development';
 let inactivityTimer: NodeJS.Timeout | null = null;
+const APP_NAME = 'FlowZ-X';
+
+app.setName(APP_NAME);
 
 // Privacy Mode State (Main Process)
 let isPrivacyMode = false;
@@ -226,7 +229,7 @@ async function createWindow() {
     height: windowHeight,
     minWidth: 800,
     minHeight: 600,
-    title: 'FlowZ',
+    title: APP_NAME,
     icon: resourceManager.getAppIconPath(),
     show: false, // 先不显示，等待加载完成
     backgroundColor: isMac ? '#00000000' : cfg.uiTheme === 'dark' ? '#121217' : '#f1f5f9',
